@@ -185,6 +185,14 @@ func WithWordWrap(wordWrap int) TermRendererOption {
 	}
 }
 
+// WithHyperLinks hides the URL.
+func WithHyperlinks(hypelink bool) TermRendererOption {
+	return func(tr *TermRenderer) error {
+		tr.ansiOptions.HyperLinks = true
+		return nil
+	}
+}
+
 // WithPreservedNewlines preserves newlines from being replaced.
 func WithPreservedNewLines() TermRendererOption {
 	return func(tr *TermRenderer) error {

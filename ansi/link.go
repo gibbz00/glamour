@@ -1,6 +1,7 @@
 package ansi
 
 import (
+	"github.com/muesli/termenv"
 	"io"
 	"net/url"
 )
@@ -10,69 +11,42 @@ type LinkElement struct {
 	Text    string
 	BaseURL string
 	URL     string
-	Child   ElementRenderer // FIXME
 }
 
-func (e *LinkElement) Render(w io.Writer, ctx RenderContext) error {
-	var textRendered bool
-	if len(e.Text) > 0 && e.Text != e.URL {
-		textRendered = true
-
-		el := &BaseElement{
-			Token: e.Text,
-			Style: ctx.options.Styles.LinkText,
-		}
-		err := el.Render(w, ctx)
-		if err != nil {
-			return err
-		}
-	}
-
-	/*
-		if node.LastChild != nil {
-			if node.LastChild.Type == bf.Image {
-				el := tr.NewElement(node.LastChild)
-				err := el.Renderer.Render(w, node.LastChild, tr)
-				if err != nil {
-					return err
-				}
-			}
-			if len(node.LastChild.Literal) > 0 &&
-				string(node.LastChild.Literal) != string(node.LinkData.Destination) {
-				textRendered = true
-				el := &BaseElement{
-					Token: string(node.LastChild.Literal),
-					Style: ctx.style[LinkText],
-				}
-				err := el.Render(w, node.LastChild, tr)
-				if err != nil {
-					return err
-				}
+func (link_element *LinkElement) Render(w io.Writer, ctx RenderContext) error {
+	if ctx.options.HyperLinks {
+		return (&BaseElement{
+			Token: termenv.Hyperlink(link_element.URL, link_element.Text),
+			Style: ctx.options.Styles.Link,
+		}).Render(w, ctx)
+	} else {
+		var rendered_text = false
+		if len(link_element.Text) > 0 && link_element.Text != link_element.URL {
+			err := (&BaseElement{
+				Token: link_element.Text,
+				Style: ctx.options.Styles.LinkText,
+			}).Render(w, ctx)
+			if err != nil {
+				return err
+			} else {
+				rendered_text = true
 			}
 		}
-	*/
 
-	u, err := url.Parse(e.URL)
-	if err == nil &&
-		"#"+u.Fragment != e.URL { // if the URL only consists of an anchor, ignore it
-		pre := " "
-		style := ctx.options.Styles.Link
-		if !textRendered {
-			pre = ""
-			style.BlockPrefix = ""
-			style.BlockSuffix = ""
-		}
-
-		el := &BaseElement{
-			Token:  resolveRelativeURL(e.BaseURL, e.URL),
-			Prefix: pre,
-			Style:  style,
-		}
-		err := el.Render(w, ctx)
-		if err != nil {
-			return err
+		url, err := url.Parse(link_element.URL)
+		// if the URL only consists of an anchor, ignore it
+		if err != nil && "#"+url.Fragment != link_element.URL {
+			padding := ""
+			if rendered_text {
+				padding = " "
+			}
+			return (&BaseElement{
+				Token:  resolveRelativeURL(link_element.BaseURL, link_element.URL),
+				Prefix: padding,
+				Style:  ctx.options.Styles.Link,
+			}).Render(w, ctx)
+		} else {
+			return nil
 		}
 	}
-
-	return nil
 }
