@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/gibbz00/glamour/ansi"
 	"github.com/muesli/termenv"
 	"github.com/yuin/goldmark"
 	emoji "github.com/yuin/goldmark-emoji"
@@ -14,8 +15,6 @@ import (
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer"
 	"github.com/yuin/goldmark/util"
-
-	"github.com/charmbracelet/glamour/ansi"
 )
 
 // A TermRendererOption sets an option on a TermRenderer.
