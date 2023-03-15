@@ -1,6 +1,6 @@
 package fuzzing
 
-import "github.com/charmbracelet/glamour"
+import "github.com/gibbz00/glamour"
 
 func Fuzz(data []byte) int {
 	_, err := glamour.RenderBytes(data, "dark")
